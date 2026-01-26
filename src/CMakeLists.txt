@@ -1,0 +1,1 @@
+add_library(${PARSER_LIB} STATIC ${PARSER_SOURCES})
