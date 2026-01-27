@@ -14,6 +14,8 @@ struct property {
   std::string name;
 };
 
+struct wildcard {};
+
 struct index {
   int value;
 };
@@ -21,7 +23,7 @@ struct index {
 struct filter;
 
 using step =
-    boost::variant<root, property, index, boost::recursive_wrapper<filter>>;
+    boost::variant<wildcard, property, index, boost::recursive_wrapper<filter>>;
 
 struct filter {
   std::string property;

@@ -1,15 +1,22 @@
 #include "execute.hpp"
-#include <iostream>
+#include "ast.hpp"
+#include <spdlog/spdlog.h>
 
 struct step_executor {
 
   const node_set &input;
   const json &root;
 
-  node_set operator()(const ast::root &) const { return {&root}; }
+  node_set operator()(const ast::wildcard &) {
+    spdlog::info("Wildcard node!");
+
+    // non-compliant behaviour, appears to output content in an array, will
+    // verify eventually
+    return input;
+  }
 
   node_set operator()(const ast::property &p) const {
-    std::cout << "Property: " << p.name << "\n";
+    spdlog::info("Property node: {}", p.name);
     node_set out;
     for (auto *n : input) {
       if (n->is_object() && n->contains(p.name))
@@ -19,7 +26,7 @@ struct step_executor {
   }
 
   node_set operator()(const ast::index &i) const {
-    std::cout << "Index: " << i.value << "\n";
+    spdlog::info("Index_node: {}", i.value);
     node_set out;
     for (auto *n : input) {
       if (n->is_array() && i.value < n->size())

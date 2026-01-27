@@ -24,8 +24,15 @@ FetchContent_Declare(
     GIT_TAG v3.12.0
     GIT_SHALLOW TRUE
 )
-
 FetchContent_MakeAvailable(nlohmann_json)
+
+FetchContent_Declare(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog
+    GIT_TAG v1.17.0
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(spdlog)
 
 add_executable(${EXECUTABLE} main.cpp)
 target_include_directories(${EXECUTABLE} PRIVATE ${PARSER_INCLUDES} ${Boost_INCLUDE_DIRS})
@@ -33,4 +40,4 @@ target_include_directories(${EXECUTABLE} PRIVATE ${PARSER_INCLUDES} ${Boost_INCL
 # subdirectories
 add_subdirectory(src)
 add_subdirectory(includes)
-target_link_libraries(Exe PUBLIC ${PARSER_LIB})
+target_link_libraries(Exe PUBLIC ${PARSER_LIB} spdlog::spdlog_header_only)
