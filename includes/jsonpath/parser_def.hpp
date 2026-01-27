@@ -11,25 +11,34 @@ namespace ascii = boost::spirit::x3::ascii;
 
 using ascii::char_;
 
-auto const identifier = x3::lexeme[x3::alpha >> *(x3::alnum | char_('_'))];
+// basic parsers
+auto const identifier =
+    x3::lexeme[(x3::alpha | char_('_')) >> *(x3::alnum | char_('_'))];
 auto const quoted_identifier =
-    (x3::omit[char_('"')] >> identifier >> x3::omit[char_('"')]) |
-    (x3::omit[char_("'")] >> identifier >> x3::omit[char_("'")]);
+    (x3::omit[char_('"')] >> *(char_ - char_('"')) >> x3::omit[char_('"')]) |
+    (x3::omit[char_("'")] >> *(char_ - char_("'")) >> x3::omit[char_("'")]);
 
-x3::rule<class root, ast::root> const root = "root";
-auto const root_def = x3::lit('$') >> x3::attr(ast::root{});
+// root
+x3::rule<struct root, ast::root> const root = "root";
+auto const root_def = x3::omit[x3::lit('$')];
 
-x3::rule<class property, ast::property> const property = "property";
+// selectors
+x3::rule<struct wildcard, ast::wildcard> const wildcard = "wildcard";
+auto const wildcard_def =
+    (x3::lit('.') >> x3::omit[char_('*')]) |
+    (x3::lit('[') >> x3::omit[char_('*')] >> x3::lit(']'));
+
+x3::rule<struct property, ast::property> const property = "property";
 auto const property_def =
     ('.' >> identifier) | ('[' >> quoted_identifier >> ']');
 
-x3::rule<class index, ast::index> const index = "index";
+x3::rule<struct index, ast::index> const index = "index";
 auto const index_def = '[' >> x3::int_ >> ']';
 
-x3::rule<class path, ast::path> const path = "path";
-auto const path_def = root >> *(property | index);
+x3::rule<struct path, ast::path> const path = "path";
+auto const path_def = root >> *(property | index | wildcard);
 
-BOOST_SPIRIT_DEFINE(path, root, property, index);
+BOOST_SPIRIT_DEFINE(path, root, property, index, wildcard);
 } // namespace parser
 
 parser::path_type path() { return parser::path; }

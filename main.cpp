@@ -17,14 +17,14 @@ int main() {
     }
     )"_json;
 
-  auto ast = parse_jsonpath("$[\"store\"][\"book\"][0].title");
-  // auto ast = parse_jsonpath("$.store.book[0].title");
+  // auto ast = parse_jsonpath("$[\"store\"][\"book\"][0].title");
+  // auto ast = parse_jsonpath("$.store.book[*]");
+  auto ast = parse_jsonpath("$.store['book']");
   // auto ast = parse_jsonpath("$.store.book[?(@.price < 10)].title");
   auto results = execute(ast, data);
 
   for (auto *j : results)
     spdlog::info("Result: {}", j->dump());
-  // std::cout << "Result: " << *j << "\n";
 
   spdlog::info("Number of ast nodes: {}\n", ast.steps.size());
 }

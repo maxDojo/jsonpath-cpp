@@ -1,4 +1,5 @@
 #include "execute.hpp"
+#include "ast.hpp"
 #include <spdlog/spdlog.h>
 
 struct step_executor {
@@ -6,7 +7,13 @@ struct step_executor {
   const node_set &input;
   const json &root;
 
-  node_set operator()(const ast::root &) const { return {&root}; }
+  node_set operator()(const ast::wildcard &) {
+    spdlog::info("Wildcard node!");
+
+    // non-compliant behaviour, appears to output content in an array, will
+    // verify eventually
+    return input;
+  }
 
   node_set operator()(const ast::property &p) const {
     spdlog::info("Property node: {}", p.name);
