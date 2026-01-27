@@ -89,10 +89,11 @@ cmake --build build
 The project is under active development.
 
 Planned work includes:
+- implement all selector types [listed here](link: https://www.rfc-editor.org/rfc/rfc9535.html#name-selectors-2)
 - filter expressions
-- full JSONPath compliance
+- full JSONPath compliance (eventually)
 - performance optimizations
-- expanded test coverage
+- test coverage
 
 ## Design Notes
 This project was originally prototyped using Flex/Bison and later reimplemented using Boost.Spirit X3 to improve type safety, reduce boilerplate, and enable direct AST construction from the grammar.
