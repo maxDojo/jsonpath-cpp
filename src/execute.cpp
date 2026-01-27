@@ -1,6 +1,7 @@
 #include "execute.hpp"
 #include "ast.hpp"
 #include <spdlog/spdlog.h>
+#include <stdexcept>
 
 struct step_executor {
 
@@ -35,14 +36,36 @@ struct step_executor {
     return out;
   }
 
-  node_set operator()(const ast::array_slice &a) {
-    int arr_start = a.start.value_or(0);
-    int arr_end = a.end.value_or(input.size());
-    int arr_step = a.step.value_or(1);
+  node_set operator()(const ast::array_slice &slice) {
     node_set out;
 
-    spdlog::info("Array slice node start: {}, end: {}, step: {}.", arr_start,
-                 arr_end, arr_step);
+    for (auto *n : input) {
+      // check if json input is array, skip otherwise
+      if (!n->is_array()) {
+        spdlog::error(
+            "Executing filter on non-array object {} returns empty array!",
+            n->dump());
+        continue;
+      }
+
+      const int size = static_cast<int>(input.size());
+      auto n_slice = normalize_slice(slice, size);
+
+      spdlog::info("Array slice node start: {}, end: {}, step: {}.",
+                   n_slice.start, n_slice.end, n_slice.step);
+
+      if (n_slice.step > 0) {
+        for (int i = n_slice.start; i < n_slice.end; i += n_slice.step) {
+          if (i >= 0 && i < size)
+            out.push_back(input[i]);
+        }
+      } else {
+        for (int i = n_slice.start; i > n_slice.end; i += n_slice.step) {
+          if (i >= 0 && i < size)
+            out.push_back(input[i]);
+        }
+      }
+    }
 
     return out;
   }
@@ -73,3 +96,30 @@ node_set execute(const ast::path &path, const json &root) {
 
   return current;
 }
+
+normalized_arr_slice normalize_slice(const ast::array_slice &slice, int size) {
+  int step = slice.step.value_or(1);
+  if (step == 0)
+    throw std::runtime_error("array slice step cannot be zero");
+
+  int start;
+  int end;
+
+  if (step > 0) {
+    start = slice.start.value_or(0);
+    end = slice.end.value_or(size);
+  } else {
+    start = slice.start.value_or(size - 1);
+    end = slice.end.value_or(-1);
+  }
+
+  if (start < 0)
+    start += size;
+  if (end < 0)
+    end += size;
+
+  start = std::clamp(start, 0, size);
+  end = std::clamp(end, -1, size);
+
+  return {start, end, step};
+};
