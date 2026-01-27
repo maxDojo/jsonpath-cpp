@@ -10,35 +10,39 @@ namespace x3 = boost::spirit::x3;
 namespace ascii = boost::spirit::x3::ascii;
 
 using ascii::char_;
+using x3::omit;
+using x3::rule;
 
 // basic parsers
 auto const identifier =
     x3::lexeme[(x3::alpha | char_('_')) >> *(x3::alnum | char_('_'))];
 auto const quoted_identifier =
-    (x3::omit[char_('"')] >> *(char_ - char_('"')) >> x3::omit[char_('"')]) |
-    (x3::omit[char_("'")] >> *(char_ - char_("'")) >> x3::omit[char_("'")]);
+    (omit[char_('"')] >> *(char_ - char_('"')) >> omit[char_('"')]) |
+    (omit[char_("'")] >> *(char_ - char_("'")) >> omit[char_("'")]);
 
 // root
-x3::rule<struct root, ast::root> const root = "root";
-auto const root_def = x3::omit[x3::lit('$')];
+rule<struct root, ast::root> const root = "root";
+auto const root_def = omit[x3::lit('$')];
 
 // selectors
-x3::rule<struct wildcard, ast::wildcard> const wildcard = "wildcard";
-auto const wildcard_def =
-    (x3::lit('.') >> x3::omit[char_('*')]) |
-    (x3::lit('[') >> x3::omit[char_('*')] >> x3::lit(']'));
+rule<struct wildcard, ast::wildcard> const wildcard = "wildcard";
+auto const wildcard_def = (x3::lit('.') >> omit[char_('*')]) |
+                          (x3::lit('[') >> omit[char_('*')] >> x3::lit(']'));
 
-x3::rule<struct property, ast::property> const property = "property";
+rule<struct property, ast::property> const property = "property";
 auto const property_def =
     ('.' >> identifier) | ('[' >> quoted_identifier >> ']');
 
-x3::rule<struct index, ast::index> const index = "index";
+rule<struct index, ast::index> const index = "index";
 auto const index_def = '[' >> x3::int_ >> ']';
 
-x3::rule<struct path, ast::path> const path = "path";
-auto const path_def = root >> *(property | index | wildcard);
+rule<struct array_slice, ast::array_slice> const array_slice = "array_slice";
+auto const array_slice_def = omit['['] >> -x3::int_ >> omit[char_(':')] >>
+                             -x3::int_ >> -omit[char_(':')] >> -x3::int_ >>
+                             omit[']'];
 
-BOOST_SPIRIT_DEFINE(path, root, property, index, wildcard);
+rule<struct path, ast::path> const path = "path";
+auto const path_def = root >> *(property | index | wildcard | array_slice);
+
+BOOST_SPIRIT_DEFINE(path, root, property, index, wildcard, array_slice);
 } // namespace parser
-
-parser::path_type path() { return parser::path; }

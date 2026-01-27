@@ -35,6 +35,18 @@ struct step_executor {
     return out;
   }
 
+  node_set operator()(const ast::array_slice &a) {
+    int arr_start = a.start.value_or(0);
+    int arr_end = a.end.value_or(input.size());
+    int arr_step = a.step.value_or(1);
+    node_set out;
+
+    spdlog::info("Array slice node start: {}, end: {}, step: {}.", arr_start,
+                 arr_end, arr_step);
+
+    return out;
+  }
+
   node_set operator()(const ast::filter &f) const {
     node_set out;
     for (auto *n : input) {
