@@ -89,7 +89,7 @@ cmake --build build
 The project is under active development.
 
 Planned work includes:
-- implement all selector types [listed here](link: https://www.rfc-editor.org/rfc/rfc9535.html#name-selectors-2)
+- implement all selector types [listed here](https://www.rfc-editor.org/rfc/rfc9535.html#name-selectors-2)
 - filter expressions
 - full JSONPath compliance (eventually)
 - performance optimizations
