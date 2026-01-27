@@ -1,9 +1,8 @@
 #include "ast.hpp"
-#include "ast_adapted.hpp"
 #include "execute.hpp"
 #include "parse.hpp"
-#include <iostream>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 using nlohmann::json;
 int main() {
@@ -24,7 +23,8 @@ int main() {
   auto results = execute(ast, data);
 
   for (auto *j : results)
-    std::cout << "Result: " << *j << "\n";
+    spdlog::info("Result: {}", j->dump());
+  // std::cout << "Result: " << *j << "\n";
 
-  std::cout << "Sizeof ast steps: " << ast.steps.size() << "\n";
+  spdlog::info("Number of ast nodes: {}\n", ast.steps.size());
 }
