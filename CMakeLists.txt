@@ -8,6 +8,7 @@ find_package(Boost REQUIRED)
 
 set(EXECUTABLE Exe)
 set(PARSER_LIB jsonpath)
+set(PARSER_TESTS jsonpath_test)
 set(PARSER_INCLUDES ${CMAKE_SOURCE_DIR}/includes/ast
                     ${CMAKE_SOURCE_DIR}/includes/jsonpath
 )
@@ -39,5 +40,12 @@ target_include_directories(${EXECUTABLE} PRIVATE ${PARSER_INCLUDES} ${Boost_INCL
 
 # subdirectories
 add_subdirectory(src)
-add_subdirectory(includes)
 target_link_libraries(Exe PUBLIC ${PARSER_LIB} spdlog::spdlog_header_only)
+
+# testing
+option(BUILD_TESTS "Build unit tests" ON)
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+

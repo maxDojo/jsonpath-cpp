@@ -8,7 +8,7 @@ struct step_executor {
   const json &root;
 
   node_set operator()(const ast::wildcard &) {
-    spdlog::info("Wildcard node!");
+    spdlog::debug("Wildcard node!");
 
     // non-compliant behaviour, appears to output content in an array, will
     // verify eventually
@@ -16,7 +16,7 @@ struct step_executor {
   }
 
   node_set operator()(const ast::property &p) const {
-    spdlog::info("Property node: {}", p.name);
+    spdlog::debug("Property node: {}", p.name);
     node_set out;
     for (auto *n : input) {
       if (n->is_object() && n->contains(p.name))
@@ -26,7 +26,7 @@ struct step_executor {
   }
 
   node_set operator()(const ast::index &i) const {
-    spdlog::info("Index_node: {}", i.value);
+    spdlog::debug("Index_node: {}", i.value);
     node_set out;
     for (auto *n : input) {
       if (n->is_array() && i.value < n->size())
