@@ -8,8 +8,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(${PARSER_TESTS}
-parser_tests.cpp
-executor_tests.cpp
+TEST_array_slice.cpp
 )
 
 target_include_directories(${PARSER_TESTS} PRIVATE ${PARSER_INCLUDES} ${Boost_INCLUDE_DIRS})

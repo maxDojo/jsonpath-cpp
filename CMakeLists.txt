@@ -14,6 +14,7 @@ set(PARSER_INCLUDES ${CMAKE_SOURCE_DIR}/includes/ast
 )
 set(PARSER_SOURCES  ${CMAKE_SOURCE_DIR}/src/execute.cpp
                     ${CMAKE_SOURCE_DIR}/src/parser.cpp
+                    ${CMAKE_SOURCE_DIR}/src/evaluate.cpp
 )
 
 # Add external dependencies
