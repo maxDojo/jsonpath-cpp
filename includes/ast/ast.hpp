@@ -20,10 +20,14 @@ struct index {
   int value;
 };
 
+struct array_slice {
+  std::optional<int> start, end, step;
+};
+
 struct filter;
 
-using step =
-    boost::variant<wildcard, property, index, boost::recursive_wrapper<filter>>;
+using step = boost::variant<wildcard, property, index, array_slice,
+                            boost::recursive_wrapper<filter>>;
 
 struct filter {
   std::string property;

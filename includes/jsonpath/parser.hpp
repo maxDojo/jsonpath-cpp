@@ -10,9 +10,10 @@ using root_type = x3::rule<class root, ast::root>;
 using wildcard_type = x3::rule<struct wildcard, ast::wildcard>;
 using property_type = x3::rule<class property, ast::property>;
 using index_type = x3::rule<class index, ast::index>;
+using array_slice_type = x3::rule<class index, ast::array_slice>;
 
 BOOST_SPIRIT_DECLARE(path_type, root_type, wildcard_type, property_type,
-                     index_type);
+                     index_type, array_slice_type);
 } // namespace parser
 
 // expose parser function

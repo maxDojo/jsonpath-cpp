@@ -35,6 +35,81 @@ struct step_executor {
     return out;
   }
 
+  node_set operator()(const ast::array_slice &slice) {
+    node_set out;
+    int step = slice.step.value_or(1);
+
+    for (auto *node : input) {
+      if (!node->is_array()) {
+        spdlog::error(
+            "EXECUTING FILTER ON NON-ARRAY OBJECT {} RETURNS EMPTY ARRAY!",
+            node->dump());
+        continue;
+      }
+      if (step == 0) {
+        spdlog::error("[ARRAY_SLICE] STEP VALUE CANNOT BE ZERO "
+                      "[(start):(end):(step)->{}]",
+                      step);
+        continue;
+      }
+
+      int size = node->size(), start, end;
+
+      if (size == 0)
+        continue;
+
+      if (step > 0) {
+        if (!slice.start.has_value())
+          start = 0;
+        else {
+          start = slice.start.value();
+
+          if (start < 0)
+            start += size;
+          start = std::clamp(start, 0, size);
+        }
+
+        if (!slice.end.has_value())
+          end = size;
+        else {
+          end = slice.end.value();
+
+          if (end < 0)
+            end += size;
+          end = std::clamp(end, 0, size);
+        }
+
+        for (int i = start; i < end; i += step)
+          out.push_back(&(*node)[i]);
+      } else {
+        if (!slice.start.has_value())
+          start = size - 1;
+        else {
+          start = slice.start.value();
+
+          if (start < 0)
+            start += size;
+          start = std::clamp(start, 0, size - 1);
+        }
+
+        if (!slice.end.has_value())
+          end = -1;
+        else {
+          end = slice.end.value();
+
+          if (end < 0)
+            end += size;
+          end = std::clamp(end, -1, size - 1);
+        }
+
+        for (int i = start; i > end; i += step)
+          out.push_back(&(*node)[i]);
+      }
+    }
+
+    return out;
+  }
+
   node_set operator()(const ast::filter &f) const {
     node_set out;
     for (auto *n : input) {
