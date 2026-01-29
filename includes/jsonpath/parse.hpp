@@ -1,17 +1,16 @@
 #pragma once
 #include "ast.hpp"
 #include "parser_def.hpp"
-#include <spdlog/spdlog.h>
 
 /** @brief Main parse function
 
 Parses input text and returns an ast representation
+
+-- first in evaluation step
 */
 inline ast::path parse_jsonpath(const std::string &input) {
   using boost::spirit::x3::phrase_parse;
   using boost::spirit::x3::space;
-
-  spdlog::info("INPUT: {}\n", input);
 
   ast::path result;
   auto it = input.begin();

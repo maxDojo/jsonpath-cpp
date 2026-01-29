@@ -1,6 +1,7 @@
 #include "ast.hpp"
 #include "execute.hpp"
 #include "parse.hpp"
+#include "tests/fixtures/sample_json.hpp"
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
@@ -17,12 +18,14 @@ int main() {
     }
     )"_json;
 
+  auto _data = test::data;
   // auto ast = parse_jsonpath("$[\"store\"][\"book\"][0].title");
-  // auto ast = parse_jsonpath("$.store.book[*]");
+  auto ast = parse_jsonpath("$.store.books[::-1]");
   // auto ast = parse_jsonpath("$.store['book'][-10000:60000]");
-  auto ast = parse_jsonpath("$.store['book'][989:5:-1]");
+  // auto ast = parse_jsonpath("$.store['book'][989:5:-1]");
   // auto ast = parse_jsonpath("$.store.book[?(@.price < 10)].title");
-  auto results = execute(ast, data);
+  auto results = execute(ast, _data);
+  // auto results = execute(ast, data);
 
   for (auto *j : results)
     spdlog::info("Result: {}", j->dump());
