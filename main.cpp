@@ -19,7 +19,8 @@ int main() {
 
   // auto ast = parse_jsonpath("$[\"store\"][\"book\"][0].title");
   // auto ast = parse_jsonpath("$.store.book[*]");
-  auto ast = parse_jsonpath("$.store['book'][1:4:0]");
+  // auto ast = parse_jsonpath("$.store['book'][-10000:60000]");
+  auto ast = parse_jsonpath("$.store['book'][989:5:-1]");
   // auto ast = parse_jsonpath("$.store.book[?(@.price < 10)].title");
   auto results = execute(ast, data);
 

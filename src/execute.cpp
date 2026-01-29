@@ -1,7 +1,6 @@
 #include "execute.hpp"
 #include "ast.hpp"
 #include <spdlog/spdlog.h>
-#include <stdexcept>
 
 struct step_executor {
 
@@ -38,32 +37,73 @@ struct step_executor {
 
   node_set operator()(const ast::array_slice &slice) {
     node_set out;
+    int step = slice.step.value_or(1);
 
-    for (auto *n : input) {
-      // check if json input is array, skip otherwise
-      if (!n->is_array()) {
+    for (auto *node : input) {
+      if (!node->is_array()) {
         spdlog::error(
-            "Executing filter on non-array object {} returns empty array!",
-            n->dump());
+            "EXECUTING FILTER ON NON-ARRAY OBJECT {} RETURNS EMPTY ARRAY!",
+            node->dump());
+        continue;
+      }
+      if (step == 0) {
+        spdlog::error("[ARRAY_SLICE] STEP VALUE CANNOT BE ZERO "
+                      "[(start):(end):(step)->{}]",
+                      step);
         continue;
       }
 
-      const int size = static_cast<int>(input.size());
-      auto n_slice = normalize_slice(slice, size);
+      int size = node->size(), start, end;
 
-      spdlog::info("Array slice node start: {}, end: {}, step: {}.",
-                   n_slice.start, n_slice.end, n_slice.step);
+      if (size == 0)
+        continue;
 
-      if (n_slice.step > 0) {
-        for (int i = n_slice.start; i < n_slice.end; i += n_slice.step) {
-          if (i >= 0 && i < size)
-            out.push_back(input[i]);
+      if (step > 0) {
+        if (!slice.start.has_value())
+          start = 0;
+        else {
+          start = slice.start.value();
+
+          if (start < 0)
+            start += size;
+          start = std::clamp(start, 0, size);
         }
+
+        if (!slice.end.has_value())
+          end = size;
+        else {
+          end = slice.end.value();
+
+          if (end < 0)
+            end += size;
+          end = std::clamp(end, 0, size);
+        }
+
+        for (int i = start; i < end; i += step)
+          out.push_back(&(*node)[i]);
       } else {
-        for (int i = n_slice.start; i > n_slice.end; i += n_slice.step) {
-          if (i >= 0 && i < size)
-            out.push_back(input[i]);
+        if (!slice.start.has_value())
+          start = size - 1;
+        else {
+          start = slice.start.value();
+
+          if (start < 0)
+            start += size;
+          start = std::clamp(start, 0, size - 1);
         }
+
+        if (!slice.end.has_value())
+          end = -1;
+        else {
+          end = slice.end.value();
+
+          if (end < 0)
+            end += size;
+          end = std::clamp(end, -1, size - 1);
+        }
+
+        for (int i = start; i > end; i += step)
+          out.push_back(&(*node)[i]);
       }
     }
 
@@ -96,30 +136,3 @@ node_set execute(const ast::path &path, const json &root) {
 
   return current;
 }
-
-normalized_arr_slice normalize_slice(const ast::array_slice &slice, int size) {
-  int step = slice.step.value_or(1);
-  if (step == 0)
-    throw std::runtime_error("array slice step cannot be zero");
-
-  int start;
-  int end;
-
-  if (step > 0) {
-    start = slice.start.value_or(0);
-    end = slice.end.value_or(size);
-  } else {
-    start = slice.start.value_or(size - 1);
-    end = slice.end.value_or(-1);
-  }
-
-  if (start < 0)
-    start += size;
-  if (end < 0)
-    end += size;
-
-  start = std::clamp(start, 0, size);
-  end = std::clamp(end, -1, size);
-
-  return {start, end, step};
-};
