@@ -27,9 +27,15 @@ struct step_executor {
   node_set operator()(const ast::index &i) const {
     spdlog::debug("Index_node: {}", i.value);
     node_set out;
+
     for (auto *n : input) {
-      if (n->is_array() && i.value < n->size())
-        out.push_back(&(*n)[i.value]);
+      int normalized_index = i.value;
+      if (normalized_index < 0)
+        normalized_index += n->size();
+
+      if (n->is_array() && normalized_index < n->size() &&
+          normalized_index >= 0)
+        out.push_back(&(*n)[normalized_index]);
     }
     return out;
   }
