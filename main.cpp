@@ -20,7 +20,7 @@ int main() {
 
   auto _data = test::data;
   // auto ast = parse_jsonpath("$[\"store\"][\"book\"][0].title");
-  auto ast = parse_jsonpath("$.store.books[::-1]");
+  auto ast = parse_jsonpath("$.store.books[-2]");
   // auto ast = parse_jsonpath("$.store['book'][-10000:60000]");
   // auto ast = parse_jsonpath("$.store['book'][989:5:-1]");
   // auto ast = parse_jsonpath("$.store.book[?(@.price < 10)].title");
